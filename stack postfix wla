@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+int prec(char c) {
+    if (c == '^') return 3;
+    if (c == '*' || c == '/') return 2;
+    if (c == '+' || c == '-') return 1;
+    return 0;
+}
+
+int isop(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
+}
+
+int pow_int(int a, int b) {
+    int r = 1;
+    while (b > 0) {
+        if (b & 1) r *= a;
+        a *= a;
+        b >>= 1;
+    }
+    return r;
+}
+
+void infixToPostfix(const char *in, char *out) {
+    char st[256];
+    int top = -1;
+    int k = 0;
+    int n = strlen(in);
+    for (int i = 0; i < n; i++) {
+        char ch = in[i];
+        if (ch == ' ' || ch == ',') continue;
+        if (isalnum((unsigned char)ch)) {
+            out[k++] = ch;
+        } else if (ch == '(') {
+            st[++top] = ch;
+        } else if (ch == ')') {
+            while (top != -1 && st[top] != '(') out[k++] = st[top--];
+            if (top != -1 && st[top] == '(') top--;
+        } else if (isop(ch)) {
+            if (ch == '^') {
+                while (top != -1 && st[top] != '(' && prec(st[top]) > prec(ch)) out[k++] = st[top--];
+            } else {
+                while (top != -1 && st[top] != '(' && prec(st[top]) >= prec(ch)) out[k++] = st[top--];
+            }
+            st[++top] = ch;
+        }
+    }
+    while (top != -1) out[k++] = st[top--];
+    out[k] = '\0';
+}
+
+int evaluatePostfix(const char *post) {
+    int st[256];
+    int top = -1;
+    for (int i = 0; post[i] != '\0'; i++) {
+        char ch = post[i];
+        if (isdigit((unsigned char)ch)) {
+            st[++top] = ch - '0';
+        } else if (isop(ch)) {
+            if (top < 1) return 0;
+            int b = st[top--];
+            int a = st[top--];
+            int res = 0;
+            if (ch == '+') res = a + b;
+            else if (ch == '-') res = a - b;
+            else if (ch == '*') res = a * b;
+            else if (ch == '/') res = (b == 0) ? 0 : a / b;
+            else if (ch == '^') res = pow_int(a, b);
+            st[++top] = res;
+        } else {
+            return 0;
+        }
+    }
+    if (top != 0) return 0;
+    return st[top];
+}
+
+int main() {
+    char expr[256];
+    char post[256];
+    if (!fgets(expr, sizeof(expr), stdin)) return 0;
+    size_t L = strlen(expr);
+    if (L && expr[L-1] == '\n') expr[L-1] = '\0';
+    infixToPostfix(expr, post);
+    printf("%s\n", post);
+    int val = evaluatePostfix(post);
+    printf("%d\n", val);
+    return 0;
+}
