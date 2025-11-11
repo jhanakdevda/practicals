@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 5
+
+int queue[MAX];
+int front = -1, rear = -1;
+
+int isFull() {
+    return (rear == MAX - 1);
+}
+
+int isEmpty() {
+    return (front == -1 || front > rear);
+}
+
+void addOrder(int orderID) {
+    if (isFull()) {
+        printf("\nQueue Overflow! Cannot take more orders.\n");
+        return;
+    }
+    if (front == -1)
+        front = 0;
+    rear++;
+    queue[rear] = orderID;
+    printf("Order %d added to queue.\n", orderID);
+}
+
+void serveOrder() {
+    if (isEmpty()) {
+        printf("\nQueue Underflow! No orders to serve.\n");
+        return;
+    }
+    printf("Order %d has been served.\n", queue[front]);
+    front++;
+    if (front > rear)
+        front = rear = -1;
+}
+
+void displayQueue() {
+    if (isEmpty()) {
+        printf("\nNo pending orders.\n");
+        return;
+    }
+    printf("\nCurrent Orders in Queue:\n");
+    for (int i = front; i <= rear; i++)
+        printf("Order %d\n", queue[i]);
+}
+
+int main() {
+    int choice, orderID;
+    while (1) {
+        printf("\n===== Pizza Parlour Job Queue =====\n");
+        printf("1. Add New Order\n");
+        printf("2. Serve Order\n");
+        printf("3. Display Current Orders\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        switch (choice) {
+            case 1:
+                printf("Enter Order ID to add: ");
+                scanf("%d", &orderID);
+                addOrder(orderID);
+                break;
+            case 2:
+                serveOrder();
+                break;
+            case 3:
+                displayQueue();
+                break;
+            case 4:
+                printf("\nThank you! Pizza Parlour closed.\n");
+                exit(0);
+            default:
+                printf("\nInvalid choice! Try again.\n");
+        }
+    }
+    return 0;
+}
