@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Node {
+    int dest;
+    int cost;
+    struct Node *next;
+};
+
+struct Node *adj[20];
+int visited[20];
+char cities[20][20];
+int n;
+
+struct Node *createNode(int d, int c) {
+    struct Node *newnode = (struct Node *)malloc(sizeof(struct Node));
+    newnode->dest = d;
+    newnode->cost = c;
+    newnode->next = NULL;
+    return newnode;
+}
+
+void addEdge(int src, int dest, int cost) {
+    struct Node *newnode = createNode(dest, cost);
+    newnode->next = adj[src];
+    adj[src] = newnode;
+
+    struct Node *newnode2 = createNode(src, cost);
+    newnode2->next = adj[dest];
+    adj[dest] = newnode2;
+}
+
+void dfs(int v) {
+    visited[v] = 1;
+    for (struct Node *temp = adj[v]; temp != NULL; temp = temp->next) {
+        if (!visited[temp->dest])
+            dfs(temp->dest);
+    }
+}
+
+int isConnected() {
+    for (int i = 0; i < n; i++) visited[i] = 0;
+    dfs(0);
+    for (int i = 0; i < n; i++)
+        if (!visited[i])
+            return 0;
+    return 1;
+}
+
+void displayGraph() {
+    printf("\nFlight Paths:\n");
+    for (int i = 0; i < n; i++) {
+        printf("%s -> ", cities[i]);
+        struct Node *temp = adj[i];
+        while (temp != NULL) {
+            printf("(%s, %d) ", cities[temp->dest], temp->cost);
+            temp = temp->next;
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    int i, src, dest, cost, choice;
+
+    printf("Enter number of cities: ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++) {
+        adj[i] = NULL;
+        visited[i] = 0;
+    }
+
+    printf("Enter city names:\n");
+    for (i = 0; i < n; i++) {
+        printf("City %d: ", i);
+        scanf("%s", cities[i]);
+    }
+
+    do {
+        printf("\n--- Flight Connection Menu ---\n");
+        printf("1. Add Flight Path\n");
+        printf("2. Display Graph\n");
+        printf("3. Check if all cities are connected\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter source city index (0 to %d): ", n - 1);
+                scanf("%d", &src);
+                printf("Enter destination city index (0 to %d): ", n - 1);
+                scanf("%d", &dest);
+                printf("Enter flight cost: ");
+                scanf("%d", &cost);
+                addEdge(src, dest, cost);
+                break;
+
+            case 2:
+                displayGraph();
+                break;
+
+            case 3:
+                if (isConnected())
+                    printf("Graph is connected. All cities are reachable.\n");
+                else
+                    printf("Graph is NOT connected. Some cities are unreachable.\n");
+                break;
+
+            case 4:
+                printf("Exiting program.\n");
+                break;
+
+            default:
+                printf("Invalid choice.\n");
+        }
+    } while (choice != 4);
+
+    return 0;
+}
