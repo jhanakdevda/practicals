@@ -1,0 +1,92 @@
+#include <stdio.h> 
+#include <string.h> 
+#define SIZE 10 
+// Structure for storing name and phone number 
+typedef struct { 
+    char name[30]; 
+    char phone[15]; 
+} Client; 
+Client table[SIZE];     // Hash table 
+int used[SIZE] = {0};   // Slot status: 0 = empty, 1 = filled 
+// Hash functions 
+int hash(char *name) { 
+    return name[0] % SIZE; 
+} 
+int hash2(char *name) { 
+    return 7 - (name[0] % 7); // Used for double hashing 
+} 
+// Linear Probing 
+void insertLinear(char *name, char *phone) { 
+    int index = hash(name); 
+    for (int i = 0; i < SIZE; i++) { 
+        int pos = (index + i) % SIZE; 
+        if (!used[pos]) { 
+            strcpy(table[pos].name, name); 
+            strcpy(table[pos].phone, phone); 
+            used[pos] = 1; 
+            printf("Inserted using Linear Probing at position %d.\n", pos); 
+            return; 
+        } 
+    } 
+    printf("Hash table is full!\n"); 
+} 
+// Quadratic Probing 
+void insertQuadratic(char *name, char *phone) { 
+    int index = hash(name); 
+    for (int i = 0; i < SIZE; i++) { 
+        int pos = (index + i * i) % SIZE; 
+        if (!used[pos]) { 
+            strcpy(table[pos].name, name); 
+            strcpy(table[pos].phone, phone); 
+            used[pos] = 1; 
+            printf("Inserted using Quadratic Probing at position %d.\n", pos); 
+            return; 
+        } 
+    } 
+    printf("Hash table is full!\n"); 
+} 
+// Double Hashing 
+void insertDoubleHash(char *name, char *phone) { 
+    int index1 = hash(name); 
+    int index2 = hash2(name); 
+    for (int i = 0; i < SIZE; i++) { 
+        int pos = (index1 + i * index2) % SIZE; 
+        if (!used[pos]) { 
+            strcpy(table[pos].name, name); 
+            strcpy(table[pos].phone, phone); 
+            used[pos] = 1; 
+            printf("Inserted using Double Hashing at position %d.\n", pos); 
+            return; 
+        } 
+    } 
+    printf("Hash table is full!\n"); 
+} 
+// Main function 
+int main() { 
+    char name[30], phone[15]; 
+    int method, cont; 
+    printf("Select collision handling method:\n"); 
+    printf("1. Linear Probing\n2. Quadratic Probing\n3. Double Hashing\n"); 
+    printf("Enter your choice (1/2/3): "); 
+    scanf("%d", &method); 
+    do { 
+        // Input client data 
+        printf("\nEnter client name: "); 
+        scanf("%s", name); 
+        printf("Enter phone number: "); 
+        scanf("%s", phone);       
+        if (method == 1) 
+            insertLinear(name, phone); 
+        else if (method == 2) 
+            insertQuadratic(name, phone); 
+        else if (method == 3) 
+            insertDoubleHash(name, phone); 
+        else 
+            printf("Invalid method selected.\n"); 
+        printf("Enter 1 to add more or 0 to exit: "); 
+        scanf("%d", &cont); 
+ 
+    } while (cont == 1); 
+ 
+    return 0; 
+} 
